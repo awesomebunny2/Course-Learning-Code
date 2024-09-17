@@ -1,9 +1,53 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 
 const cors = require("cors");
 
 app.use(cors());
+
+const Note = require("./models/note");
+
+// const mongoose = require("mongoose");
+
+// const url = process.env.MONGODB_URI;
+
+// mongoose.set("strictQuery", false);
+
+// mongoose.connect(url);
+
+// const noteSchema = new mongoose.Schema({
+//     content: String,
+//     important: Boolean
+// });
+
+// const Note = mongoose.model("Note", noteSchema);
+
+// const mongoose = require('mongoose')
+
+// // const password = process.argv[2]
+
+// // const url = `mongodb+srv://awesomebunny:${password}@cluster0.kizfh.mongodb.net/noteApp?retryWrites=true&w=majority&appName=Cluster0`;
+// const url = process.env.MONGODB_URI;
+
+// mongoose.set('strictQuery',false);
+// mongoose.connect(url);
+
+// const noteSchema = new mongoose.Schema({
+//     content: String,
+//     important: Boolean,
+// });
+
+// noteSchema.set('toJSON', {
+//     transform: (document, returnedObject) => {
+//         returnedObject.id = returnedObject._id.toString();
+//         delete returnedObject._id;
+//         delete returnedObject._v;
+//     }
+// });
+
+// const Note = mongoose.model('Note', noteSchema);
+
 
 //#region NOTES --------------------------------------------------------------------------------------------------------------------------------------
 
@@ -71,7 +115,9 @@ app.use(cors());
     });
 
     app.get("/api/notes", (request, response) => {
-        response.json(notes);
+        Note.find({}).then(notes => {
+            response.json(notes);
+        });
     });
 
     app.get("/api/notes/:id", (request, response) => {
@@ -90,6 +136,10 @@ app.use(cors());
         const id = request.params.id;
         notes = notes.filter(note => note.id !==id);
         response.status(204).end();
+
+        Note.findById(request.params.id).then(note => {
+            response.json(note);
+        });
     });
 
 
@@ -97,22 +147,26 @@ app.use(cors());
     app.post("/api/notes", (request, response) => {
         const body = request.body;
 
-        if (!body.content) {
+        if (body.content === undefined) {
             return response.status(400).json({
                 error: "Body Content Missing..."
             });
         };
 
-        const note = {
+        const note = new Note({
             content: body.content,
-            important: Boolean(body.important) || false,
-            id: generateId()
-        };
+            important: Boolean(body.important) || false
+            // id: generateId()
+        });
 
-        notes = notes.concat(note);
+        note.save().then(savedNote => {
+            response.json(savedNote);
+        });
 
-        console.log(note);
-        response.json(note);
+        // notes = notes.concat(note);
+
+        // console.log(note);
+        // response.json(note);
     });
 
 //#endregion -----------------------------------------------------------------------------------------------------------------------------------------
@@ -127,7 +181,7 @@ app.use(cors());
 
 //#region APP LISTEN ---------------------------------------------------------------------------------------------------------------------------------
 
-    const PORT = process.env.PORT || 3001;
+    const PORT = process.env.PORT;
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
     });
