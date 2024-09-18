@@ -1,11 +1,42 @@
+//Get all
 GET http://localhost:3001/api/notes
 
 ###
 
+//Malformatted id
+GET http://localhost:3001/api/notes/2
+
+###
+
+//correct id get
+GET http://localhost:3001/api/notes/66e34bbd9f8de37abd61321b
+
+###
+
+//Get Unknown Endpoint
+GET http://localhost:3001/notes
+
+###
+
+//add note
 POST http://localhost:3001/api/notes
 Content-Type: application/json
 
 {
     "content": "Testing Testing VSCode Resting",
     "important": true
+}
+
+###
+
+DELETE http://localhost:3001/api/notes/66eae272d5e12480afc58aa7
+
+####
+
+PUT http://localhost:3001/api/notes/66e9dd928db610a4910f624d
+Content-Type: application/json
+
+{
+    "content": "This has been updated",
+    "important": false
 }
